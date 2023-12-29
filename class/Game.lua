@@ -37,24 +37,33 @@ function Game:newRound()
         aiCards = {},
         nextState = Game.StateOptions.Deal
     }
+    self.deck:shuffle()
 end
 
-function Game:calcPlayerHand()
+function Game:calcPlayerHand(fromAi)
     local total = 0
+
     for i = 1, #self.round.playerCards do
-        if total + self.round.playerCards[i].value > 7 then 
+        if self.round.playerCards[i].value > 7 then 
             total = total + 0.5 
         else 
             total = total + self.round.playerCards[i].value 
         end
     end
-    return total
+    
+    -- The ai needs to make decision based on the card he can see on the table
+    -- ai does not know about what the player helds in his hand
+    if fromAi then
+        return total - self.round.playerCards[1].value
+    else
+        return total
+    end
 end
 
 function Game:calcAiHand()
     local total = 0
     for i = 1, #self.round.aiCards do
-        if total + self.round.aiCards[i].value > 7 then 
+        if self.round.aiCards[i].value > 7 then 
             total = total + 0.5 
         else 
             total = total + self.round.aiCards[i].value 
@@ -67,7 +76,7 @@ function Game:endRound()
     if self:calcPlayerHand() > Game.Rules.maxValue then
         print("Banco wins")
         self.points.ai = self.points.ai + 1;
-    elseif self:calcPlayerHand() == self:calcAiHand() then
+    elseif self:calcPlayerHand() <= self:calcAiHand() then
         print("Banco wins")
         self.points.ai = self.points.ai + 1;
     else
@@ -90,58 +99,98 @@ function Game:handleRound()
     print("round.nextState", self.round.nextState)
 
     if self.round.nextState == Game.StateOptions.Deal then
-        -- Give card to player
-        local playerLastCard = self.deck:deal(1)
-        
-        if playerLastCard then
-            table.insert(self.round.playerCards, playerLastCard)
-            print("player card: ",  playerLastCard.value .. " ".. playerLastCard.seed .. " / Total: ".. self:calcPlayerHand())
-        else 
-            print('!cards')
-            return
-        end
-        -- Give card to AI
-        table.insert(self.round.aiCards, self.deck:deal(1))
-        local bancoLastCard = self.round.aiCards[#self.round.aiCards]
-        print("bancoLastCard: ",  bancoLastCard.value .. " ".. bancoLastCard.seed.. " / Total: ".. self:calcAiHand())
-        self.round.nextState = Game.StateOptions.PlayerDue
+        self:deal()
         return
     end
 
     if self.round.nextState == Game.StateOptions.PlayerDue then
-        -- Give card to player
-        table.insert(self.round.playerCards, self.deck:deal(1) )
-        local playerLastCard = self.round.playerCards[#self.round.playerCards]
-
-        print("player card: ",  playerLastCard.value .. " ".. playerLastCard.seed .. " / Total: ".. self:calcPlayerHand())
-
-        local bancoLastCard = self.round.aiCards[#self.round.aiCards]
-        print("bancoLastCard: ",  bancoLastCard.value .. " ".. bancoLastCard.seed.. " / Total: ".. self:calcAiHand())
-
-        -- if not palazzo then it's player's turn again
-        if self:calcPlayerHand() > 7.5 then
-            print("palazzo")
-            self:endRound()
-        else 
-            self.round.nextState = Game.StateOptions.PlayerDue
-        end
+        self:playerCalls()
         return
     end
 
     if self.round.nextState == Game.StateOptions.AIDue then
-        -- Give card to player
-        local aiLastCard = self.deck:deal(1)
-        table.insert(self.round.aiCards, aiLastCard)
-        local playerLastCard = self.round.playerCards[#self.round.playerCards]
-        
-        print("player card: ",  playerLastCard.value .. " ".. playerLastCard.seed .. " / Total: ".. self:calcPlayerHand())
-        print("bancoLastCard: ",  aiLastCard.value .. " ".. aiLastCard.seed.. " / Total: ".. self:calcAiHand())
 
-        if self:calcAiHand() >= 7.5 then
-            self:endRound()
+        -- Has player drawn any card?
+        if #self.round.playerCards > 1 then
+            print("Player called")
+            -- Player called, how much do they have on the table?
+            -- if the difference between what is in the table is too low we call
+            -- Assume AI as 6 and Player has 5
+            -- We know player has at least 5.5 if not 6
+            if self:calcAiHand() - self:calcPlayerHand(true) < 1.5 then
+                print("diff too low")
+                self:aiCalls()
+            else 
+                print("Banco stays")
+                self:endRound()
+            end
         else
-            self:handleRound()
+            -- Player did not call, we must assume he has 5 or more
+            if self:calcAiHand() >= 5 then
+                -- we could have enough, we stop here right now.
+                -- endgame
+                print("Banco stays")
+                self:endRound()
+            else
+                print("troppo poco, banco chiama")
+                self:aiCalls()
+                -- Our hand is poor, let's get another card
+            end
         end
+        
+    end
+end
+
+function Game:aiCalls()
+    local aiLastCard = self.deck:deal(1)
+    table.insert(self.round.aiCards, aiLastCard)
+    local playerLastCard = self.round.playerCards[#self.round.playerCards]
+    
+    print("player card: ",  playerLastCard.value .. " ".. playerLastCard.seed .. " / Total: ".. self:calcPlayerHand())
+    print("bancoLastCard: ",  aiLastCard.value .. " ".. aiLastCard.seed.. " / Total: ".. self:calcAiHand())
+
+    if self:calcAiHand() >= 7.5 then
+        self:endRound()
+    else
+        self:handleRound()
+    end
+end 
+
+function Game:deal()
+    -- Give card to player
+    local playerLastCard = self.deck:deal(1)
+    
+    if playerLastCard then
+        table.insert(self.round.playerCards, playerLastCard)
+        print("player card: ",  playerLastCard.value .. " ".. playerLastCard.seed .. " / Total: ".. self:calcPlayerHand())
+    else 
+        print('!cards')
+        return
+    end
+    -- Give card to AI
+    table.insert(self.round.aiCards, self.deck:deal(1))
+    local bancoLastCard = self.round.aiCards[#self.round.aiCards]
+    print("bancoLastCard: ",  bancoLastCard.value .. " ".. bancoLastCard.seed.. " / Total: ".. self:calcAiHand())
+    self.round.nextState = Game.StateOptions.PlayerDue
+    return
+end
+
+function Game:playerCalls()
+    -- Give card to player
+    table.insert(self.round.playerCards, self.deck:deal(1) )
+    local playerLastCard = self.round.playerCards[#self.round.playerCards]
+
+    print("player card: ",  playerLastCard.value .. " ".. playerLastCard.seed .. " / Total: ".. self:calcPlayerHand())
+
+    local bancoLastCard = self.round.aiCards[#self.round.aiCards]
+    print("bancoLastCard: ",  bancoLastCard.value .. " ".. bancoLastCard.seed.. " / Total: ".. self:calcAiHand())
+
+    -- if not palazzo then it's player's turn again
+    if self:calcPlayerHand() > 7.5 then
+        print("palazzo")
+        self:endRound()
+    else 
+        self.round.nextState = Game.StateOptions.PlayerDue
     end
 end
 

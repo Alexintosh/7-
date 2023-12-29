@@ -10,7 +10,6 @@ local buttons = {}
 function love.load()
     -- Run once at game initialization
     deck = Deck.new()
-    deck:shuffle()
     game = Game.new(deck)
     print(inspect(game.round))
 

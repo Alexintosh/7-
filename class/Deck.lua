@@ -7,9 +7,13 @@ local Deck = classes.class() -- Create a class without any parent
 
 Deck.maxCards = 40
 Deck.maxPerType = 10
-Deck.debug = true
+Deck.debug = false
 
 function Deck:init()
+    self:reset()
+end
+
+function Deck:reset()
     self.db = {}
     self.dealtCards = {}
 
@@ -19,10 +23,10 @@ function Deck:init()
             table.insert(self.db, c)
         end
     end
-
 end
 
 function Deck:shuffle()
+    self:reset()
     for i = #self.db, 2, -1 do
         local j = math.random(i)
         self.db[i], self.db[j] = self.db[j], self.db[i]
