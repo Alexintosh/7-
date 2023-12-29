@@ -16,10 +16,36 @@ Card.Suits = {
 }
 
 Card.Seeds = {
-    "Oro",
-    "Mazze",
-    "Spade",
-    "Coppe"
+    {
+        label = "Oro",
+        bg = {235, 210, 52},
+        textColor = {0, 0, 0},
+    },
+    {
+        label = "Mazze",
+        bg = {235, 210, 52},
+        textColor = {0, 0, 0},
+    },
+    {
+        label = "Spade",
+        bg = {235, 210, 52},
+        textColor = {0, 0, 0},
+    },
+    {
+        label = "Coppe",
+        bg = {235, 210, 52},
+        textColor = {0, 0, 0},
+    },
+}
+
+cardBack = {
+    x = 100,
+    y = 100,
+    width = 120,
+    height = 180,
+    color = {0.1, 0.4, 0.8}, -- Dark blue
+    patternColor = {0.9, 0.9, 0.9}, -- Light color for pattern
+    patternSpacing = 20 -- Space between pattern elements
 }
 
 function Card:init(_type, _seed, _value)
@@ -30,6 +56,60 @@ function Card:init(_type, _seed, _value)
     self.type = _type
     self.seed = Card.Seeds[_seed]
     self.value = _value
+    self.ui = {
+        x = 100,
+        y = 100,
+        width = 120,
+        height = 180,
+        cornerRadius = 10,
+        borderWidth = 5,
+        suit = self.seed.label,
+        rank = self.value,
+        color = {self.seed.bg[1] / 255, self.seed.bg[2] / 255, self.seed.bg[3] / 255},
+        borderColor = {0, 0, 0}, -- Black
+        textColor = {self.seed.textColor[1] / 255, self.seed.textColor[2] / 255, self.seed.textColor[3] / 255},
+    }
+end
+
+function Card:draw(prevX, prevY)
+
+    self.ui.x = prevX + 50
+    self.ui.y = prevY
+
+    love.graphics.setColor(self.ui.color)
+    love.graphics.rectangle("fill", self.ui.x, self.ui.y, self.ui.width, self.ui.height, self.ui.cornerRadius)
+
+    -- Draw card border
+    love.graphics.setColor(self.ui.borderColor)
+    love.graphics.setLineWidth(self.ui.borderWidth)
+    love.graphics.rectangle("line", self.ui.x, self.ui.y, self.ui.width, self.ui.height, self.ui.cornerRadius)
+
+    -- Draw suit and rank
+    love.graphics.setColor(self.ui.textColor)
+    local fontSize = 24
+    love.graphics.setNewFont(fontSize)
+    love.graphics.print(self.ui.rank, self.ui.x + 5, self.ui.y + 5)
+    love.graphics.print(self.ui.suit, self.ui.x + 5 , self.ui.y + self.ui.height - fontSize - 5)
+end
+
+function Card:drawBack(prevX, prevY)
+
+    cardBack.x = prevX + 50
+    cardBack.y = prevY
+
+    self.ui.x = prevX + 50
+    self.ui.y = prevY
+    -- Draw card back
+    love.graphics.setColor(cardBack.color)
+    love.graphics.rectangle("fill", cardBack.x, cardBack.y, cardBack.width, cardBack.height)
+
+    -- Draw pattern on card back
+    love.graphics.setColor(cardBack.patternColor)
+    for i = cardBack.x, cardBack.x + cardBack.width, cardBack.patternSpacing do
+        for j = cardBack.y, cardBack.y + cardBack.height, cardBack.patternSpacing do
+            love.graphics.circle("fill", i, j, 5) -- Draw small circles as the pattern
+        end
+    end
 end
 
 return Card

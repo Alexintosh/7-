@@ -76,6 +76,9 @@ function Game:endRound()
     if self:calcPlayerHand() > Game.Rules.maxValue then
         print("Banco wins")
         self.points.ai = self.points.ai + 1;
+    elseif self:calcAiHand() > Game.Rules.maxValue then
+            print("Player wins")
+            self.points.player = self.points.player + 1;
     elseif self:calcPlayerHand() <= self:calcAiHand() then
         print("Banco wins")
         self.points.ai = self.points.ai + 1;
@@ -92,7 +95,7 @@ function Game:endRound()
     print("  " .. self.points.player .. " | " .. self.points.ai)
     print("--------------")
 
-    self:newRound()
+    -- self:newRound()
 end
 
 function Game:handleRound()
@@ -117,11 +120,11 @@ function Game:handleRound()
             -- if the difference between what is in the table is too low we call
             -- Assume AI as 6 and Player has 5
             -- We know player has at least 5.5 if not 6
-            if self:calcAiHand() - self:calcPlayerHand(true) < 1.5 then
+            if (self:calcAiHand() - self:calcPlayerHand(true)) < 1.5 then
                 print("diff too low")
                 self:aiCalls()
             else 
-                print("Banco stays")
+                print("Banco stays!!!", self:calcAiHand() - self:calcPlayerHand(true))
                 self:endRound()
             end
         else
@@ -146,8 +149,8 @@ function Game:aiCalls()
     table.insert(self.round.aiCards, aiLastCard)
     local playerLastCard = self.round.playerCards[#self.round.playerCards]
     
-    print("player card: ",  playerLastCard.value .. " ".. playerLastCard.seed .. " / Total: ".. self:calcPlayerHand())
-    print("bancoLastCard: ",  aiLastCard.value .. " ".. aiLastCard.seed.. " / Total: ".. self:calcAiHand())
+    print("player card: ",  playerLastCard.value .. " ".. playerLastCard.seed.label .. " / Total: ".. self:calcPlayerHand())
+    print("bancoLastCard: ",  aiLastCard.value .. " ".. aiLastCard.seed.label.. " / Total: ".. self:calcAiHand())
 
     if self:calcAiHand() >= 7.5 then
         self:endRound()
@@ -162,7 +165,7 @@ function Game:deal()
     
     if playerLastCard then
         table.insert(self.round.playerCards, playerLastCard)
-        print("player card: ",  playerLastCard.value .. " ".. playerLastCard.seed .. " / Total: ".. self:calcPlayerHand())
+        print("player card: ",  playerLastCard.value .. " ".. playerLastCard.seed.label .. " / Total: ".. self:calcPlayerHand())
     else 
         print('!cards')
         return
@@ -170,7 +173,7 @@ function Game:deal()
     -- Give card to AI
     table.insert(self.round.aiCards, self.deck:deal(1))
     local bancoLastCard = self.round.aiCards[#self.round.aiCards]
-    print("bancoLastCard: ",  bancoLastCard.value .. " ".. bancoLastCard.seed.. " / Total: ".. self:calcAiHand())
+    print("bancoLastCard: ",  bancoLastCard.value .. " ".. bancoLastCard.seed.label.. " / Total: ".. self:calcAiHand())
     self.round.nextState = Game.StateOptions.PlayerDue
     return
 end
@@ -180,16 +183,19 @@ function Game:playerCalls()
     table.insert(self.round.playerCards, self.deck:deal(1) )
     local playerLastCard = self.round.playerCards[#self.round.playerCards]
 
-    print("player card: ",  playerLastCard.value .. " ".. playerLastCard.seed .. " / Total: ".. self:calcPlayerHand())
+    print("player card: ",  playerLastCard.value .. " ".. playerLastCard.seed.label .. " / Total: ".. self:calcPlayerHand())
 
     local bancoLastCard = self.round.aiCards[#self.round.aiCards]
-    print("bancoLastCard: ",  bancoLastCard.value .. " ".. bancoLastCard.seed.. " / Total: ".. self:calcAiHand())
+    print("bancoLastCard: ",  bancoLastCard.value .. " ".. bancoLastCard.seed.label.. " / Total: ".. self:calcAiHand())
 
     -- if not palazzo then it's player's turn again
     if self:calcPlayerHand() > 7.5 then
         print("palazzo")
         self:endRound()
-    else 
+    elseif self:calcPlayerHand() == 7.5 then
+        print("player 7 mezzo")
+        self.round.nextState = Game.StateOptions.AIDue
+    else
         self.round.nextState = Game.StateOptions.PlayerDue
     end
 end

@@ -8,6 +8,14 @@ local buttons = {}
 
 
 function love.load()
+    -- Set Background Color to #1b8724 (27, 135, 36)
+    -- Note: Remember that Love uses 0-1 and not 0-255
+    red = 27/255
+    green = 135/255
+    blue = 36/255
+    color = { red, green, blue}
+    love.graphics.setBackgroundColor( color)
+
     -- Run once at game initialization
     deck = Deck.new()
     game = Game.new(deck)
@@ -50,6 +58,7 @@ end
 
 function love.keypressed(key, scancode, isrepeat)
     -- Run each time a key on the keyboard is pressed
+    game:newRound()
 end
 
 function love.mousepressed(x, y, button, istouch, presses)
@@ -71,16 +80,31 @@ function love.update(dt)
 end
 
 function love.draw()
-  -- Called at every frame to draw the game
-  -- Draw card rectangle
-  love.graphics.rectangle("line", card.x, card.y, card.width, card.height)
 
-  -- Draw text inside the card
-  -- Adjust the text position as needed
-  love.graphics.printf(card.text, card.x, card.y + card.height / 2, card.width, "center")
+    -- Drawing player cards to the left
+    for i, card in ipairs(game.round.playerCards) do
+        if i == 1 then 
+            card:draw(20, 20)
+        else
+            card:draw(game.round.playerCards[i-1].ui.x, game.round.playerCards[i-1].ui.y)
+        end
+    end
+
+    -- Drawing ai cards to the right
+    for i, card in ipairs(game.round.aiCards) do
+        if i == 1 then
+            if game.round.nextState == Game.StateOptions.End then
+                card:draw(20, 250)
+            else
+                card:drawBack(20, 250)
+            end
+        else
+            card:draw(game.round.aiCards[i-1].ui.x, game.round.aiCards[i-1].ui.y)
+        end
+    end
 
 
-  -- Bottoni
+    -- Bottoni
     for _, button in ipairs(buttons) do
         love.graphics.rectangle("line", button.x, button.y, button.width, button.height)
         love.graphics.printf(button.text, button.x, button.y + button.height / 4, button.width, "center")
