@@ -1,41 +1,40 @@
 local Deck = require "class.Deck"
 local Game = require "class.Game"
+local Modal = require "class.UI"
 local inspect = require "lib.inspect"
+flux = require "lib.flux"
+
 
 local deck
 local game
+local ui
 local buttons = {}
 
 
 function love.load()
     -- Set Background Color to #1b8724 (27, 135, 36)
     -- Note: Remember that Love uses 0-1 and not 0-255
-    red = 27/255
-    green = 135/255
-    blue = 36/255
+    red = 252/255
+    green = 214/255
+    blue = 192/255
     color = { red, green, blue}
     love.graphics.setBackgroundColor( color)
 
     -- Run once at game initialization
     deck = Deck.new()
-    game = Game.new(deck)
-    print(inspect(game.round))
+    ui = Modal.new()
+    game = Game.new(deck, ui)
 
+    ui:show("Sette e mezz'", 2)
 
-    -- Set up card properties
-    card = {
-        x = 100,   -- X position
-        y = 100,   -- Y position
-        width = 70,
-        height = 100,
-        text = "Ace of Spades"
-    }
 
     buttons = {
         {
             text = "Mi sto",
             x = 100,
             y = 500,
+            cornerRadius = 10,
+            borderWidth = 5,
             width = 200,
             height = 50,
             onClick = function()
@@ -44,10 +43,12 @@ function love.load()
         },
         {
             text = "Carta",
-            x = 400,
+            x = 450,
             y = 500,
             width = 200,
             height = 50,
+            cornerRadius = 10,
+            borderWidth = 5,
             onClick = function()
                 game:handleRound()
                 print("--- \n")
@@ -58,7 +59,19 @@ end
 
 function love.keypressed(key, scancode, isrepeat)
     -- Run each time a key on the keyboard is pressed
-    game:newRound()
+    print("key", key)
+    if key == "up" then
+        if game.round.nextState == Game.StateOptions.End then
+            game:newRound()
+            game:handleRound()
+        end
+    elseif key == "left" then
+        game:playerStay()
+    elseif key == "right" then
+        game:handleRound()
+    else
+    end
+
 end
 
 function love.mousepressed(x, y, button, istouch, presses)
@@ -75,12 +88,17 @@ function love.mousepressed(x, y, button, istouch, presses)
 end
 
 function love.update(dt)
+    require("lib.lovebird").update()
+    
+    -- require("lib.lurker").update()
     -- Run at each frame before drawing it
     -- This is where you handle most of your game logic
+    flux.update(dt)
+    ui:update(dt)
 end
 
 function love.draw()
-
+    ui:draw()
     -- Drawing player cards to the left
     for i, card in ipairs(game.round.playerCards) do
         if i == 1 then 
@@ -106,7 +124,7 @@ function love.draw()
 
     -- Bottoni
     for _, button in ipairs(buttons) do
-        love.graphics.rectangle("line", button.x, button.y, button.width, button.height)
+        love.graphics.rectangle("line", button.x, button.y, button.width, button.height, button.cornerRadius)
         love.graphics.printf(button.text, button.x, button.y + button.height / 4, button.width, "center")
     end
 end

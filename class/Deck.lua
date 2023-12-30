@@ -26,6 +26,7 @@ function Deck:reset()
 end
 
 function Deck:shuffle()
+    math.randomseed(os.time())
     self:reset()
     for i = #self.db, 2, -1 do
         local j = math.random(i)

@@ -1,6 +1,6 @@
 -- Load the classes helper file
 local classes = require "class.classes"
-
+flux = require "lib.flux"
 local Card = classes.class() -- Create a class without any parent
 
 Card.Types = {
@@ -18,22 +18,22 @@ Card.Suits = {
 Card.Seeds = {
     {
         label = "Oro",
-        bg = {235, 210, 52},
+        bg = {255, 233, 166},
         textColor = {0, 0, 0},
     },
     {
         label = "Mazze",
-        bg = {235, 210, 52},
+        bg = {14, 235, 172},
         textColor = {0, 0, 0},
     },
     {
         label = "Spade",
-        bg = {235, 210, 52},
+        bg = {125, 136, 219},
         textColor = {0, 0, 0},
     },
     {
         label = "Coppe",
-        bg = {235, 210, 52},
+        bg = {240, 141, 179},
         textColor = {0, 0, 0},
     },
 }
@@ -64,11 +64,19 @@ function Card:init(_type, _seed, _value)
         cornerRadius = 10,
         borderWidth = 5,
         suit = self.seed.label,
-        rank = self.value,
+        rank = (self.value > 7) and "/" or self.value,
         color = {self.seed.bg[1] / 255, self.seed.bg[2] / 255, self.seed.bg[3] / 255},
         borderColor = {0, 0, 0}, -- Black
         textColor = {self.seed.textColor[1] / 255, self.seed.textColor[2] / 255, self.seed.textColor[3] / 255},
     }
+end
+
+function Card:getVal()
+    if self.value > 7 then 
+        return 0.5 
+    else 
+        return self.value
+    end
 end
 
 function Card:draw(prevX, prevY)

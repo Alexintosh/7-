@@ -21,14 +21,20 @@ Game.Rules = {
     maxValue = 7.5,
 }
 
-function Game:init(deck)
+function Game:init(deck, modal)
     self.started = true
     self.points = { 
         player = 0, 
         ai = 0,
     }
+    self.round = {
+        playerCards = {},
+        aiCards = {},
+        nextState = Game.StateOptions.Deal
+    }
     self.deck = deck
     self:newRound()
+    self.modal = modal
 end
 
 function Game:newRound() 
@@ -44,17 +50,13 @@ function Game:calcPlayerHand(fromAi)
     local total = 0
 
     for i = 1, #self.round.playerCards do
-        if self.round.playerCards[i].value > 7 then 
-            total = total + 0.5 
-        else 
-            total = total + self.round.playerCards[i].value 
-        end
+        total = total + self.round.playerCards[i]:getVal()
     end
     
     -- The ai needs to make decision based on the card he can see on the table
     -- ai does not know about what the player helds in his hand
-    if fromAi then
-        return total - self.round.playerCards[1].value
+    if fromAi and total ~= 7.5 then
+        return total - self.round.playerCards[1]:getVal()
     else
         return total
     end
@@ -74,16 +76,16 @@ end
 
 function Game:endRound()
     if self:calcPlayerHand() > Game.Rules.maxValue then
-        print("Banco wins")
+        self.modal:show("Palazzo \n Banco wins")
         self.points.ai = self.points.ai + 1;
     elseif self:calcAiHand() > Game.Rules.maxValue then
-            print("Player wins")
+            self.modal:show("Player wins")
             self.points.player = self.points.player + 1;
     elseif self:calcPlayerHand() <= self:calcAiHand() then
-        print("Banco wins")
+        self.modal:show("Banco wins")
         self.points.ai = self.points.ai + 1;
     else
-        print("Player wins")
+        self.modal:show("Player wins")
         self.points.player = self.points.player + 1;
     end
 
@@ -117,11 +119,27 @@ function Game:handleRound()
         if #self.round.playerCards > 1 then
             print("Player called")
             -- Player called, how much do they have on the table?
+
+
+            if self:calcPlayerHand(true) == 7.5 then
+                print("diff too low")
+                self:aiCalls()
+                return
+            end
             -- if the difference between what is in the table is too low we call
             -- Assume AI as 6 and Player has 5
             -- We know player has at least 5.5 if not 6
-            if (self:calcAiHand() - self:calcPlayerHand(true)) < 1.5 then
+            print("calcAiHand", self:calcAiHand())
+            print("calcPlayerHand", self:calcPlayerHand(true))
+            local diff = self:calcAiHand() - self:calcPlayerHand(true)
+            if diff < 0 then
                 print("diff too low")
+                self:aiCalls()
+            elseif diff >= 0 and diff < 1.5 then
+                print("diff too low 2")
+                self:aiCalls()
+            elseif diff >= 0 and diff < 1.5 and self:calcAiHand() < 5 then
+                print("diff too low 2")
                 self:aiCalls()
             else 
                 print("Banco stays!!!", self:calcAiHand() - self:calcPlayerHand(true))
@@ -190,18 +208,19 @@ function Game:playerCalls()
 
     -- if not palazzo then it's player's turn again
     if self:calcPlayerHand() > 7.5 then
-        print("palazzo")
+        self.modal:show("palazzo", 2)
         self:endRound()
     elseif self:calcPlayerHand() == 7.5 then
-        print("player 7 mezzo")
+        self.modal:show("7 mezzo MAROOONNN")
         self.round.nextState = Game.StateOptions.AIDue
+        self:handleRound()
     else
         self.round.nextState = Game.StateOptions.PlayerDue
     end
 end
 
 function Game:playerStay()
-    print("playerStay")
+    self.modal:show("Ti stai", 1)
     if self.round.nextState == Game.StateOptions.PlayerDue then
         self.round.nextState = Game.StateOptions.AIDue
     end
