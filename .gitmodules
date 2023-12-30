@@ -1,0 +1,12 @@
+[submodule "lib/hex2color"]
+	path = lib/hex2color
+	url = https://github.com/S-Walrus/hex2color/
+[submodule "lib/lue"]
+	path = lib/lue
+	url = https://github.com/Ulydev/lue
+[submodule "lib/scenary"]
+	path = lib/scenary
+	url = https://github.com/paltze/scenery
+[submodule "lib/push"]
+	path = lib/push
+	url = https://github.com/Ulydev/push
