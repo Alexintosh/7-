@@ -90,7 +90,6 @@ function Game:endRound()
     end
 
     self.round.nextState = Game.StateOptions.End
-    print("Scoring")
     print("--------------")
     print("Player / Banco")
     print("--------------")
