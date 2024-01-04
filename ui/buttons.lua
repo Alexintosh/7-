@@ -8,8 +8,6 @@ function Buttons:init()
 end
 
 function Buttons:add(conf)
-    print("AAAAA")
-    print(inspect(conf))
     table.insert(self.elements, {
         text = conf.text and conf.text or "Text",
         x = conf.x and conf.x or 100,

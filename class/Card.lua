@@ -12,7 +12,8 @@ Card.Suits = {
     Oro = 1,
     Mazze = 2,
     Spade = 3, 
-    Coppe = 4
+    Coppe = 4,
+    Special = 5
 }
 
 Card.Seeds = {
@@ -36,15 +37,20 @@ Card.Seeds = {
         bg = {240, 141, 179},
         textColor = {0, 0, 0},
     },
+    {
+        label = "Special",
+        bg = {240, 141, 179},
+        textColor = {0, 0, 0},
+    },
 }
 
 cardBack = {
     x = 100,
     y = 100,
-    width = 120,
-    height = 180,
+    width = 80,
+    height = 120,
     color = {0.1, 0.4, 0.8}, -- Dark blue
-    patternColor = {0.9, 0.9, 0.9}, -- Light color for pattern
+    patternColor = {0.7, 0.7, 0.7}, -- Light color for pattern
     patternSpacing = 20 -- Space between pattern elements
 }
 
@@ -59,8 +65,8 @@ function Card:init(_type, _seed, _value)
     self.ui = {
         x = 100,
         y = 100,
-        width = 120,
-        height = 180,
+        width = 80,
+        height = 120,
         cornerRadius = 10,
         borderWidth = 5,
         suit = self.seed.label,

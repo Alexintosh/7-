@@ -8,7 +8,8 @@ Game.StateOptions = {
     PlayerDue = 1,
     AIDue = 2, 
     End = 3,
-    Deal = 4
+    Deal = 4,
+    Next = 5
 }
 
 Game.PlayerOptions = {
@@ -21,28 +22,37 @@ Game.Rules = {
     maxValue = 7.5,
 }
 
+Game.roundInitialState = {
+    playerCards = {},
+    player = {
+        life = 5,
+        cash = 10000
+    },
+    ai = {
+        life = 5,
+        cash = 10000
+    },
+    aiCards = {},
+    nextState = Game.StateOptions.Deal
+}
+
 function Game:init(deck, modal)
     self.started = true
     self.points = { 
         player = 0, 
         ai = 0,
     }
-    self.round = {
-        playerCards = {},
-        aiCards = {},
-        nextState = Game.StateOptions.Deal
-    }
+    self.round = self.roundInitialState
     self.deck = deck
     self:newRound()
     self.modal = modal
 end
 
 function Game:newRound() 
-    self.round = {
-        playerCards = {},
-        aiCards = {},
-        nextState = Game.StateOptions.Deal
-    }
+    self.round.playerCards = {}
+    self.round.aiCards = {}
+    self.round.nextState = Game.StateOptions.Deal
+
     self.deck:shuffle()
 end
 
@@ -75,28 +85,47 @@ function Game:calcAiHand()
 end
 
 function Game:endRound()
+    playerWins = false
+    aiWins = false
+
     if self:calcPlayerHand() > Game.Rules.maxValue then
-        self.modal:show("Palazzo \n Banco wins")
-        self.points.ai = self.points.ai + 1;
+        aiWins = true
     elseif self:calcAiHand() > Game.Rules.maxValue then
-            self.modal:show("Player wins")
-            self.points.player = self.points.player + 1;
+            playerWins = true
     elseif self:calcPlayerHand() <= self:calcAiHand() then
-        self.modal:show("Banco wins")
-        self.points.ai = self.points.ai + 1;
+        aiWins = true
     else
-        self.modal:show("Player wins")
-        self.points.player = self.points.player + 1;
+        playerWins = true
     end
 
-    self.round.nextState = Game.StateOptions.End
+    if aiWins then
+        self.modal:show("Banco wins")
+        self.points.ai = self.points.ai + 1;
+        self.round.player.life = self.round.player.life - 1
+    end
+
+    if playerWins then
+        self.modal:show("Player wins")
+        self.points.player = self.points.player + 1;
+        self.round.ai.life = self.round.ai.life - 1
+    end
+
+
+    if self.round.ai.life <= 0 then
+        -- Shop screen?
+        self.round.nextState = Game.StateOptions.Next
+    elseif self.round.player.life <= 0 then
+        -- Game over screen
+        self.round.nextState = Game.StateOptions.Next
+    else
+        self.round.nextState = Game.StateOptions.End
+    end
+    
     print("--------------")
     print("Player / Banco")
     print("--------------")
     print("  " .. self.points.player .. " | " .. self.points.ai)
     print("--------------")
-
-    -- self:newRound()
 end
 
 function Game:handleRound()

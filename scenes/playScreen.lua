@@ -90,10 +90,17 @@ function playScreen:update(dt)
 end
 
 function playScreen:draw()
+    screenWidth, screenHeight = love.graphics.getDimensions()
     gradientBg:draw()
     ui:draw()
     self:drawCards();
     btn:draw()
+
+    local font = love.graphics.getFont()
+    --regular text
+    local plainText = love.graphics.newText(font, "P:".. game.round.player.life .. " - $".. game.round.player.cash .." | " .. "AI:".. game.round.ai.life .." - $".. game.round.ai.cash)
+    love.graphics.draw (plainText, 10, screenHeight - 30)
+
 end
 
 function playScreen:drawCards()
