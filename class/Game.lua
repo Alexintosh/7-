@@ -25,7 +25,7 @@ Game.Rules = {
 Game.roundInitialState = {
     playerCards = {},
     player = {
-        life = 5,
+        life = 500000,
         cash = 10000
     },
     ai = {

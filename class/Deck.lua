@@ -1,6 +1,7 @@
 -- Load the classes helper file
 local classes = require "class.classes"
 local Card = require "class.Card"
+local BaseSpecial = require "class.specialCards.BaseSpecial"
 local inspect = require "lib.inspect"
 
 local Deck = classes.class() -- Create a class without any parent

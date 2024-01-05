@@ -12,8 +12,7 @@ Card.Suits = {
     Oro = 1,
     Mazze = 2,
     Spade = 3, 
-    Coppe = 4,
-    Special = 5
+    Coppe = 4
 }
 
 Card.Seeds = {
@@ -41,7 +40,7 @@ Card.Seeds = {
         label = "Special",
         bg = {240, 141, 179},
         textColor = {0, 0, 0},
-    },
+    }
 }
 
 cardBack = {
@@ -58,10 +57,10 @@ function Card:init(_type, _seed, _value)
     if Card.Types[_type] == nil then error("!type") end
     -- if Card.Suits[_seed] == nil then error("!seed") end
     if _value < 0 or _value > 10 then error("!value") end
-    
     self.type = _type
     self.seed = Card.Seeds[_seed]
     self.value = _value
+
     self.ui = {
         x = 100,
         y = 100,
@@ -86,21 +85,15 @@ function Card:getVal()
     end
 end
 
--- function Card:mousePressed(x, y, button)
---     if tonumber(button) == 1
---     and x > self.ui.x and x < self.ui.x + self.ui.width
---     and y > self.ui.y and y < self.ui.y + self.ui.height
---     then
---         self.ui.dragging.active = true
---         self.ui.dragging.diffX = x - self.ui.x
---         self.ui.dragging.diffY = y - self.ui.y
---     end
--- end
-
-function Card:draw(prevX, prevY)
+function Card:drawStacked(prevX, prevY)
 
     self.ui.x = prevX + 50
     self.ui.y = prevY
+
+    self:draw()
+end
+
+function Card:draw()
 
     love.graphics.setColor(self.ui.color)
     love.graphics.rectangle("fill", self.ui.x, self.ui.y, self.ui.width, self.ui.height, self.ui.cornerRadius)
@@ -137,12 +130,5 @@ function Card:drawBack(prevX, prevY)
         end
     end
 end
-
--- function Card:update(dt)
---     if self.ui.dragging.active then
---         self.ui.x = love.mouse.getX() - self.ui.dragging.diffX
---         self.ui.y = love.mouse.getY() - self.ui.dragging.diffY
---     end
--- end
 
 return Card

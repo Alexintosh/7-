@@ -131,9 +131,9 @@ function playScreen:drawCards()
    -- Drawing player cards to the left
    for i, card in ipairs(game.round.playerCards) do
         if i == 1 then 
-            card:draw(20, 20)
+            card:drawStacked(20, 20)
         else
-            card:draw(game.round.playerCards[i-1].ui.x, game.round.playerCards[i-1].ui.y)
+            card:drawStacked(game.round.playerCards[i-1].ui.x, game.round.playerCards[i-1].ui.y)
         end
     end
 
@@ -141,12 +141,12 @@ function playScreen:drawCards()
     for i, card in ipairs(game.round.aiCards) do
         if i == 1 then
             if game.round.nextState == Game.StateOptions.End then
-                card:draw(20, 250)
+                card:drawStacked(20, 250)
             else
                 card:drawBack(20, 250)
             end
         else
-            card:draw(game.round.aiCards[i-1].ui.x, game.round.aiCards[i-1].ui.y)
+            card:drawStacked(game.round.aiCards[i-1].ui.x, game.round.aiCards[i-1].ui.y)
         end
     end 
 end
