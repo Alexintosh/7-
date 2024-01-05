@@ -19,11 +19,6 @@ function splash:goTo()
     self.setScene("playScreen")
 end
 
-function love.mousepressed(x, y, button, istouch, presses)
-    -- Run each time a mouse button is pressed, supports multi-touch too
-    splash:goTo()
-end
-
 
 function splash:update(dt)
     imageX = (windowWidth - (logo:getWidth() * scaleX)) / 2

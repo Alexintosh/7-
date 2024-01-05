@@ -74,6 +74,7 @@ function Card:init(_type, _seed, _value)
         color = {self.seed.bg[1] / 255, self.seed.bg[2] / 255, self.seed.bg[3] / 255},
         borderColor = {0, 0, 0}, -- Black
         textColor = {self.seed.textColor[1] / 255, self.seed.textColor[2] / 255, self.seed.textColor[3] / 255},
+        dragging = { active = false, diffX = 0, diffY = 0 },
     }
 end
 
@@ -84,6 +85,17 @@ function Card:getVal()
         return self.value
     end
 end
+
+-- function Card:mousePressed(x, y, button)
+--     if tonumber(button) == 1
+--     and x > self.ui.x and x < self.ui.x + self.ui.width
+--     and y > self.ui.y and y < self.ui.y + self.ui.height
+--     then
+--         self.ui.dragging.active = true
+--         self.ui.dragging.diffX = x - self.ui.x
+--         self.ui.dragging.diffY = y - self.ui.y
+--     end
+-- end
 
 function Card:draw(prevX, prevY)
 
@@ -125,5 +137,12 @@ function Card:drawBack(prevX, prevY)
         end
     end
 end
+
+-- function Card:update(dt)
+--     if self.ui.dragging.active then
+--         self.ui.x = love.mouse.getX() - self.ui.dragging.diffX
+--         self.ui.y = love.mouse.getY() - self.ui.dragging.diffY
+--     end
+-- end
 
 return Card

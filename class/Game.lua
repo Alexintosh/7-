@@ -33,6 +33,7 @@ Game.roundInitialState = {
         cash = 10000
     },
     aiCards = {},
+    pot = 0,
     nextState = Game.StateOptions.Deal
 }
 
@@ -51,6 +52,7 @@ end
 function Game:newRound() 
     self.round.playerCards = {}
     self.round.aiCards = {}
+    self.round.pot = 0
     self.round.nextState = Game.StateOptions.Deal
 
     self.deck:shuffle()
@@ -91,7 +93,7 @@ function Game:endRound()
     if self:calcPlayerHand() > Game.Rules.maxValue then
         aiWins = true
     elseif self:calcAiHand() > Game.Rules.maxValue then
-            playerWins = true
+        playerWins = true
     elseif self:calcPlayerHand() <= self:calcAiHand() then
         aiWins = true
     else
@@ -102,20 +104,24 @@ function Game:endRound()
         self.modal:show("Banco wins")
         self.points.ai = self.points.ai + 1;
         self.round.player.life = self.round.player.life - 1
+        self.round.ai.cash = self.round.ai.cash + self.round.pot
     end
 
     if playerWins then
         self.modal:show("Player wins")
         self.points.player = self.points.player + 1;
         self.round.ai.life = self.round.ai.life - 1
+        self.round.player.cash = self.round.player.cash + self.round.pot
     end
 
 
     if self.round.ai.life <= 0 then
         -- Shop screen?
         self.round.nextState = Game.StateOptions.Next
+        self.modal:show("Ai dead")
     elseif self.round.player.life <= 0 then
         -- Game over screen
+        self.modal:show("Player dead")
         self.round.nextState = Game.StateOptions.Next
     else
         self.round.nextState = Game.StateOptions.End
@@ -129,7 +135,7 @@ function Game:endRound()
 end
 
 function Game:handleRound()
-    print("round.nextState", self.round.nextState)
+    print("handleround", self.round.nextState)
 
     if self.round.nextState == Game.StateOptions.Deal then
         self:deal()
@@ -201,6 +207,7 @@ function Game:aiCalls()
     if self:calcAiHand() >= 7.5 then
         self:endRound()
     else
+        print("aiCalls")
         self:handleRound()
     end
 end 
@@ -241,10 +248,25 @@ function Game:playerCalls()
     elseif self:calcPlayerHand() == 7.5 then
         self.modal:show("7 mezzo MAROOONNN")
         self.round.nextState = Game.StateOptions.AIDue
+        print("playerCalls")
         self:handleRound()
     else
         self.round.nextState = Game.StateOptions.PlayerDue
     end
+end
+
+function Game:playerBet()
+    amount = 50
+    if self.round.player.cash - amount <= 0 or self.round.ai.cash - amount <= 0 then
+        print("Out of cash")
+        return
+    end
+
+    self.round.player.cash = self.round.player.cash - amount
+    self.round.pot = self.round.pot + 50
+
+    self.round.ai.cash = self.round.ai.cash - amount
+    self.round.pot = self.round.pot + 50
 end
 
 function Game:playerStay()
@@ -252,6 +274,7 @@ function Game:playerStay()
     if self.round.nextState == Game.StateOptions.PlayerDue then
         self.round.nextState = Game.StateOptions.AIDue
     end
+    print("playerStay")
     self:handleRound()
 end
 

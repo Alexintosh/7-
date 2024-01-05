@@ -38,6 +38,7 @@ function playScreen:load()
     
     btn:add({
         text = "Mi sto",
+        x = 50,
         y = 500,
         onClick = function()
             game:playerStay()
@@ -46,14 +47,23 @@ function playScreen:load()
 
     btn:add({
         text = "Carta",
-        x = 450,
+        x = 270,
         y = 500,
         onClick = function()
             game:handleRound()
             print("--- \n")
         end
     })
-    
+
+    btn:add({
+        text = "Bet 50",
+        x = 500,
+        y = 500,
+        onClick = function()
+            game:playerBet()
+            print("--- \n")
+        end
+    })
 
     -- Start game
     game:newRound()
@@ -62,25 +72,36 @@ end
 
 function love.keypressed(key, scancode, isrepeat)
     -- Run each time a key on the keyboard is pressed
-    print("key", key)
     if key == "up" then
         if game.round.nextState == Game.StateOptions.End then
             game:newRound()
+            print("love.keypressed")
             game:handleRound()
         end
     elseif key == "left" then
         game:playerStay()
     elseif key == "right" then
+        print("love.keypressed")
         game:handleRound()
     else
     end
 
 end
 
-function love.mousepressed(x, y, button, istouch, presses)
+function playScreen:mousepressed(x, y, button, istouch, presses)
     -- Run each time a mouse button is pressed, supports multi-touch too
-    btn:handleEvents(x, y, button, istouch, presses)    
+    btn:handleEvents(x, y, button, istouch, presses)
 end
+
+-- function playScreen:mousereleased(x, y, button)    
+--     for _, card in ipairs(deck.db) do
+--         if tonumber(button) == 1 then card.ui.dragging.active = false end
+--     end
+
+--     for _, card in ipairs(deck.dealtCards) do
+--         if tonumber(button) == 1 then card.ui.dragging.active = false end
+--     end
+-- end
 
 function playScreen:update(dt)
     require("lib.lovebird").update()
@@ -100,6 +121,9 @@ function playScreen:draw()
     --regular text
     local plainText = love.graphics.newText(font, "P:".. game.round.player.life .. " - $".. game.round.player.cash .." | " .. "AI:".. game.round.ai.life .." - $".. game.round.ai.cash)
     love.graphics.draw (plainText, 10, screenHeight - 30)
+
+    local pot = love.graphics.newText(font, "Pot: $" .. game.round.pot)
+    love.graphics.draw (pot, screenWidth - 150, screenHeight - 30)
 
 end
 
