@@ -37,6 +37,10 @@ Game.roundInitialState = {
     nextState = Game.StateOptions.Deal
 }
 
+Game.conf = {
+    enableLifes = false
+}
+
 function Game:init(deck, modal)
     self.started = true
     self.points = { 
@@ -115,17 +119,22 @@ function Game:endRound()
     end
 
 
-    if self.round.ai.life <= 0 then
-        -- Shop screen?
-        self.round.nextState = Game.StateOptions.Next
-        self.modal:show("Ai dead")
-    elseif self.round.player.life <= 0 then
-        -- Game over screen
-        self.modal:show("Player dead")
-        self.round.nextState = Game.StateOptions.Next
+    if(self.conf.enableLifes) then 
+        if self.round.ai.life <= 0 then
+            -- Shop screen?
+            self.round.nextState = Game.StateOptions.Next
+            self.modal:show("Ai dead")
+        elseif self.round.player.life <= 0 then
+            -- Game over screen
+            self.modal:show("Player dead")
+            self.round.nextState = Game.StateOptions.Next
+        else
+            self.round.nextState = Game.StateOptions.End
+        end
     else
         self.round.nextState = Game.StateOptions.End
     end
+
     
     print("--------------")
     print("Player / Banco")

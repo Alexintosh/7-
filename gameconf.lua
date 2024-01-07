@@ -1,5 +1,5 @@
 GAMECONF = {
-    inGameDebug = true
+    inGameDebug = false
 }
 
 return GAMECONF

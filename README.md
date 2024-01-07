@@ -1,3 +1,9 @@
+# 7 /
+Digital version of the italian "7 e mezzo".
+Made in a few hours to get acquaintanted with Love2d and Lua.
+
+<img src="./screenshot.png" />
+
 # Tools
 - Live reload: https://github.com/patrixr/lovelier
 

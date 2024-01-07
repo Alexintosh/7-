@@ -50,6 +50,9 @@ function playScreen:load()
         x = 270,
         y = 500,
         onClick = function()
+            if game.round.nextState == Game.StateOptions.End then
+                game:newRound()
+            end
             game:handleRound()
             print("--- \n")
         end
@@ -82,6 +85,9 @@ function love.keypressed(key, scancode, isrepeat)
         game:playerStay()
     elseif key == "right" then
         print("love.keypressed")
+        if game.round.nextState == Game.StateOptions.End then
+            game:newRound()
+        end
         game:handleRound()
     else
     end
